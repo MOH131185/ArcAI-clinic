@@ -2,3 +2,4 @@ frontend/node_modules
 backend/.venv
 .env
 backend/.venv
+arcai-dvc_accessKeys.csv
