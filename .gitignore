@@ -3,3 +3,5 @@ backend/.venv
 .env
 backend/.venv
 arcai-dvc_accessKeys.csv
+backend/.env
+backend/.env
