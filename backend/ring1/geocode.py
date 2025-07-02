@@ -1,38 +1,25 @@
-import os
-import requests
-from dotenv import load_dotenv
-
-# Load env vars from backend/.env
-load_dotenv(override=True)
-
-GOOGLE_KEY = os.getenv("GOOGLE_GEOCODE_KEY")
-if not GOOGLE_KEY:
-    raise RuntimeError("Missing GOOGLE_GEOCODE_KEY in environment")
+from geopy.geocoders import GoogleV3
 
 class Geocoder:
-    BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+    def __init__(self, api_key: str):
+        if not api_key:
+            raise ValueError("Missing Google API key")
+        self.geolocator = GoogleV3(api_key=api_key)
 
-    def geocode_address(self, address: str) -> dict:
-        address = address.strip()
-        if not address:
+    def geocode_address(self, address: str):
+        """
+        Turn a free-form address or postcode into
+        { latitude, longitude, formatted_address }.
+        """
+        if not address.strip():
             raise ValueError("Address must not be empty")
-
-        params = {
-            "address": address,
-            "key": GOOGLE_KEY,
-        }
-        resp = requests.get(self.BASE_URL, params=params, timeout=5)
-        data = resp.json()
-
-        if data.get("status") != "OK":
-            msg = data.get("error_message") or data.get("status")
-            raise ValueError(f"Geocoding failed: {msg}")
-
-        result = data["results"][0]
-        loc    = result["geometry"]["location"]
+        loc = self.geolocator.geocode(address)
+        if loc is None:
+            raise ValueError(f"Could not geocode '{address}'")
         return {
-            "latitude":           loc["lat"],
-            "longitude":          loc["lng"],
-            "formatted_address": result["formatted_address"],
+            "latitude": loc.latitude,
+            "longitude": loc.longitude,
+            "formatted_address": loc.address,
         }
+
 
