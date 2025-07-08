@@ -1,13 +1,561 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    <title>Clinic Layout Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+        }
+        
+        input { 
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button { 
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 160px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #error { 
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border-left: 4px solid #c44569;
+        }
+        
+        #success {
+            background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+            color: white;
+            border-left: 4px solid #0984e3;
+        }
+        
+        #loading {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            text-align: center;
+            border-left: 4px solid #2d3436;
+        }
+        
+        #rate-limit-warning {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            color: white;
+            border-left: 4px solid #d63031;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .results {
+            margin-top: 2.5rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .results h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+        
+        .file-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .file-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #2ed573 0%, #17a2b8 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            gap: 0.5rem;
+            position: relative;
+        }
+        
+        .file-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(46, 213, 115, 0.3);
+        }
+        
+        .file-link.png {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .file-link.dxf {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+        }
+        
+        .file-link.ifc {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+        
+        .file-icon {
+            font-size: 1.3rem;
+        }
+        
+        .rate-limit-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+        
+        .feature-desc {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .file-links {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .download-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .file-link.downloading .download-progress {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Clinic Layout Generator</h1>
+        <p class="subtitle">Transform any address into professional architectural files</p>
+        
+        <div class="rate-limit-info">
+            ⏱️ Rate limit: <span id="rate-limit-display">10 requests per minute</span> | 
+            🔑 Uses Google Maps API for geocoding
+        </div>
+        
+        <div class="feature-list">
+            <div class="feature">
+                <div class="feature-icon">🗺️</div>
+                <div class="feature-title">Smart Geocoding</div>
+                <div class="feature-desc">Converts addresses to precise coordinates</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🖼️</div>
+                <div class="feature-title">Visual Layouts</div>
+                <div class="feature-desc">Generates styled PNG floor plans</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📐</div>
+                <div class="feature-title">CAD Files</div>
+                <div class="feature-desc">Creates industry-standard DXF files</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏗️</div>
+                <div class="feature-title">BIM Ready</div>
+                <div class="feature-desc">Exports to IFC format for BIM software</div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <input id="address" placeholder="Enter address (e.g., DN4 7BH, London, UK, 123 Main St)" />
+            <button id="go">Generate Layout</button>
+        </div>
+        
+        <div id="loading" class="message">
+            <div class="spinner"></div>
+            <span>Generating your clinic layout files... This may take 10-30 seconds.</span>
+        </div>
+        
+        <div id="rate-limit-warning" class="message">
+            <strong>⚠️ Rate Limit Exceeded</strong><br>
+            You've made too many requests. Please wait a minute before trying again.
+            <br><small>We limit requests to prevent API abuse and keep the service free.</small>
+        </div>
+        
+        <div id="error" class="message"></div>
+        <div id="success" class="message"></div>
+        
+        <div id="results" class="results">
+            <h3>📁 Your Generated Files</h3>
+            <div id="file-links" class="file-links"></div>
+        </div>
+    </div>
+
+    <script>
+        const addressInput = document.getElementById("address");
+        const generateButton = document.getElementById("go");
+        const errorDiv = document.getElementById("error");
+        const successDiv = document.getElementById("success");
+        const loadingDiv = document.getElementById("loading");
+        const resultsDiv = document.getElementById("results");
+        const fileLinksDiv = document.getElementById("file-links");
+        const rateLimitWarning = document.getElementById("rate-limit-warning");
+        const rateLimitDisplay = document.getElementById("rate-limit-display");
+
+        // Track request count for client-side rate limiting
+        let requestCount = 0;
+        let lastRequestTime = 0;
+        const RATE_LIMIT = 10; // requests per minute
+        const RATE_WINDOW = 60 * 1000; // 60 seconds in milliseconds
+
+        // Load configuration on startup
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    rateLimitDisplay.textContent = `${config.rate_limit_per_minute} requests per minute`;
+                }
+            } catch (error) {
+                console.warn('Could not load configuration:', error);
+            }
+        }
+
+        // Check if user is within rate limit
+        function checkRateLimit() {
+            const now = Date.now();
+            
+            // Reset count if window has passed
+            if (now - lastRequestTime > RATE_WINDOW) {
+                requestCount = 0;
+            }
+            
+            if (requestCount >= RATE_LIMIT) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Track request
+        function trackRequest() {
+            requestCount++;
+            lastRequestTime = Date.now();
+        }
+
+        async function generateLayout() {
+            const address = addressInput.value.trim();
+            
+            // Reset UI state
+            hideAllMessages();
+            
+            // Validation
+            if (!address) {
+                showError("Please enter a valid address");
+                return;
+            }
+            
+            if (address.length > 200) {
+                showError("Address too long (maximum 200 characters)");
+                return;
+            }
+            
+            // Client-side rate limit check
+            if (!checkRateLimit()) {
+                showRateLimitWarning();
+                return;
+            }
+            
+            // Show loading state
+            showLoading();
+            trackRequest();
+            
+            try {
+                console.log("🚀 Making request for address:", address);
+                
+                const response = await fetch(`/design/plan?address=${encodeURIComponent(address)}`);
+                console.log("📡 Response status:", response.status);
+                
+                if (response.status === 429) {
+                    showRateLimitWarning();
+                    return;
+                }
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Server error (${response.status})`);
+                }
+                
+                const data = await response.json();
+                console.log("✅ Response data:", data);
+                
+                // Show success and results
+                showSuccess(address);
+                showResults(data);
+                
+            } catch (error) {
+                console.error("❌ Error:", error);
+                
+                // Check if it's a network error that might be rate limiting
+                if (error.message.includes('429') || error.message.includes('rate limit')) {
+                    showRateLimitWarning();
+                } else {
+                    showError(error.message);
+                }
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function hideAllMessages() {
+            errorDiv.style.display = "none";
+            successDiv.style.display = "none";
+            resultsDiv.style.display = "none";
+            rateLimitWarning.style.display = "none";
+        }
+
+        function showLoading() {
+            loadingDiv.style.display = "block";
+            generateButton.disabled = true;
+            generateButton.textContent = "Generating...";
+        }
+
+        function hideLoading() {
+            loadingDiv.style.display = "none";
+            generateButton.disabled = false;
+            generateButton.textContent = "Generate Layout";
+        }
+
+        function showError(message) {
+            errorDiv.innerHTML = `
+                <strong>❌ Error:</strong> ${message}
+                <br><small>Please check your address and try again. If the problem persists, contact support.</small>
+            `;
+            errorDiv.style.display = "block";
+        }
+
+        function showRateLimitWarning() {
+            rateLimitWarning.style.display = "block";
+            setTimeout(() => {
+                if (rateLimitWarning.style.display === "block") {
+                    rateLimitWarning.style.display = "none";
+                }
+            }, 10000); // Hide after 10 seconds
+        }
+
+        function showSuccess(address) {
+            successDiv.innerHTML = `
+                <strong>🎉 Success!</strong> Layout files generated for: <em>${address}</em>
+                <br><small>All files are ready for download below. Files are stored securely and will be available for 24 hours.</small>
+            `;
+            successDiv.style.display = "block";
+        }
+
+        function showResults(data) {
+            fileLinksDiv.innerHTML = `
+                <a href="${data.plan_png}" class="file-link png" target="_blank" onclick="trackDownload('png')">
+                    <span class="file-icon">🖼️</span>
+                    <span>View Layout (PNG)</span>
+                    <div class="download-progress"></div>
+                </a>
+                <a href="${data.dxf}" class="file-link dxf" target="_blank" download onclick="trackDownload('dxf')">
+                    <span class="file-icon">📐</span>
+                    <span>Download DXF</span>
+                    <div class="download-progress"></div>
+                </a>
+                <a href="${data.ifc}" class="file-link ifc" target="_blank" download onclick="trackDownload('ifc')">
+                    <span class="file-icon">🏗️</span>
+                    <span>Download IFC</span>
+                    <div class="download-progress"></div>
+                </a>
+            `;
+            resultsDiv.style.display = "block";
+        }
+
+        function trackDownload(fileType) {
+            console.log(`📥 User downloaded ${fileType.toUpperCase()} file`);
+            
+            // Add download animation
+            event.currentTarget.classList.add('downloading');
+            setTimeout(() => {
+                event.currentTarget.classList.remove('downloading');
+            }, 1000);
+        }
+
+        // Event listeners
+        generateButton.addEventListener("click", generateLayout);
+        
+        addressInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                generateLayout();
+            }
+        });
+
+        // Focus input on page load and load config
+        window.addEventListener("load", () => {
+            addressInput.focus();
+            loadConfig();
+        });
+
+        // Add helpful placeholder cycling
+        const placeholders = [
+            "DN4 7BH",
+            "123 Main Street, London",
+            "1600 Pennsylvania Avenue, Washington DC",
+            "Times Square, New York",
+            "Big Ben, London, UK"
+        ];
+
+        let placeholderIndex = 0;
+        setInterval(() => {
+            placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+            addressInput.placeholder = `Enter address (e.g., ${placeholders[placeholderIndex]})`;
+        }, 3000);
+    </script>
+</body>
 </html>

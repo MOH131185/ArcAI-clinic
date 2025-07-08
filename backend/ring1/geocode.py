@@ -1,25 +1,24 @@
-from geopy.geocoders import GoogleV3
+# backend/ring1/geocode.py
 
-class Geocoder:
-    def __init__(self, api_key: str):
-        if not api_key:
-            raise ValueError("Missing Google API key")
-        self.geolocator = GoogleV3(api_key=api_key)
+import os
+from googlemaps import Client
 
-    def geocode_address(self, address: str):
-        """
-        Turn a free-form address or postcode into
-        { latitude, longitude, formatted_address }.
-        """
-        if not address.strip():
-            raise ValueError("Address must not be empty")
-        loc = self.geolocator.geocode(address)
-        if loc is None:
-            raise ValueError(f"Could not geocode '{address}'")
-        return {
-            "latitude": loc.latitude,
-            "longitude": loc.longitude,
-            "formatted_address": loc.address,
-        }
+gmaps = Client(key=os.getenv("GOOGLE_API_KEY"))
 
+def geocode_address(address: str) -> dict:
+    if not address.strip():
+        raise ValueError("Empty address")
 
+    results = gmaps.geocode(address)
+    if not results:
+        raise ValueError("No results for address")
+
+    loc = results[0]["geometry"]["location"]
+    # for demo we fake a 50m×50m bbox around the point
+    delta = 0.0005
+    xmin = loc["lng"] - delta
+    xmax = loc["lng"] + delta
+    ymin = loc["lat"] - delta
+    ymax = loc["lat"] + delta
+
+    return {"bbox": [xmin, ymin, xmax, ymax]}

@@ -1,7 +1,132 @@
-frontend/node_modules
-backend/.venv
+# ============================================
+# SECURITY - NEVER COMMIT THESE FILES
+# ============================================
+
+# Environment variables and secrets
 .env
-backend/.venv
-arcai-dvc_accessKeys.csv
-backend/.env
-backend/.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+
+# API Keys and credentials
+config/secrets.json
+secrets/
+credentials/
+*.key
+*.pem
+*.p12
+
+# ============================================
+# PYTHON
+# ============================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# ============================================
+# APPLICATION SPECIFIC
+# ============================================
+
+# Generated output files
+outputs/
+generated/
+temp/
+tmp/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+cache/
+
+# ============================================
+# DEVELOPMENT TOOLS
+# ============================================
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ============================================
+# DOCKER
+# ============================================
+.dockerignore
+Dockerfile.dev
+
+# ============================================
+# NODE.JS (if you add frontend build tools)
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# BACKUP FILES
+# ============================================
+*.bak
+*.backup
+*.old
+backup/
