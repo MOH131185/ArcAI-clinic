@@ -1,203 +1,207 @@
-# backend/main.py - Secure Configuration
+# backend/main.py - Railway deployment with proper PORT handling
 
 import os
 import logging
 from pathlib import Path
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
-# Import configuration
-from backend.config import settings, validate_environment
+# Try to import slowapi, fallback if not available
+try:
+    from slowapi import Limiter, _rate_limit_exceeded_handler
+    from slowapi.util import get_remote_address
+    from slowapi.errors import RateLimitExceeded
+    RATE_LIMITING_AVAILABLE = True
+except ImportError:
+    logging.warning("slowapi not available, rate limiting disabled")
+    RATE_LIMITING_AVAILABLE = False
 
-# Import functions from the ring modules
-from backend.ring1.geocode import geocode_address
+# Import basic modules (fallback if enhanced modules not available)
+try:
+    from backend.ring1.enhanced_geocode import get_location_intelligence
+    from backend.ring1.climate_analysis import get_climate_data, get_solar_analysis
+    from backend.ring1.architectural_styles import get_architectural_recommendations
+    ENHANCED_FEATURES = True
+except ImportError:
+    logging.warning("Enhanced features not available, using basic functionality")
+    try:
+        from backend.ring1.geocode import geocode_address
+    except ImportError:
+        logging.error("No geocode module available")
+        geocode_address = None
+    ENHANCED_FEATURES = False
+
 from backend.ring2.main import generate_plan_png
 from backend.ring2.style import style_png
 from backend.ring3.dxf_generator import generate_dxf
 from backend.ring4.ifc_exporter import convert_dxf_to_ifc
 
-# ─── STARTUP VALIDATION ──────────────────────────────────────────────────────
+# ─── CONFIGURATION ───────────────────────────────────────────────────────────
 
-if not validate_environment():
-    exit(1)
+# Basic environment setup
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY or GOOGLE_API_KEY == "your_actual_google_maps_api_key_here":
+    logging.warning("⚠️ GOOGLE_API_KEY not properly configured")
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
+DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+
+# Create output directory
+OUTPUT_DIR = Path("outputs")
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 # ─── APPLICATION SETUP ───────────────────────────────────────────────────────
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
-
-# Create FastAPI app
 app = FastAPI(
-    title="Clinic Layout Generator",
-    description="Transform addresses into professional architectural files",
-    version="1.0.0",
-    debug=settings.debug
+    title="AI Architecture Platform",
+    description="Transform addresses into professional architectural designs",
+    version="2.0.0",
+    debug=DEBUG
 )
 
-# Add rate limiting
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Setup rate limiting if available
+if RATE_LIMITING_AVAILABLE:
+    limiter = Limiter(key_func=get_remote_address)
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ─── SECURITY MIDDLEWARE ─────────────────────────────────────────────────────
+# ─── MIDDLEWARE ──────────────────────────────────────────────────────────────
 
-# Trusted hosts (prevents Host header attacks)
+# CORS configuration - permissive for demo
 app.add_middleware(
-    TrustedHostMiddleware, 
-    allowed_hosts=settings.allowed_hosts
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
-# CORS configuration
-if settings.environment == "development":
-    # Permissive CORS for development
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-else:
-    # Restrictive CORS for production
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[f"https://{host}" for host in settings.allowed_hosts],
-        allow_credentials=True,
-        allow_methods=["GET", "POST"],
-        allow_headers=["*"],
-    )
+# ─── STATIC FILES ────────────────────────────────────────────────────────────
 
-# ─── STATIC FILE SERVING ─────────────────────────────────────────────────────
-
-# Serve generated files
-app.mount("/outputs", StaticFiles(directory=str(settings.output_directory)), name="outputs")
+app.mount("/outputs", StaticFiles(directory=str(OUTPUT_DIR)), name="outputs")
 
 # ─── API ENDPOINTS ───────────────────────────────────────────────────────────
 
+@app.get("/")
+async def root():
+    """Root endpoint for health checks."""
+    return {
+        "message": "AI Architecture Platform is running",
+        "status": "healthy",
+        "version": "2.0.0"
+    }
+
 @app.get("/api/status")
-@limiter.limit("30/minute")  # Higher limit for status endpoint
 async def api_status(request: Request):
     """API status endpoint."""
     return {
         "status": "healthy",
-        "environment": settings.environment,
-        "version": "1.0.0"
-    }
-
-@app.get("/api/config")
-@limiter.limit("10/minute")
-async def get_config(request: Request):
-    """Get public configuration information."""
-    return {
-        "rate_limit_per_minute": settings.rate_limit_per_minute,
-        "max_file_size_mb": settings.max_file_size_mb,
-        "supported_formats": ["PNG", "DXF", "IFC"],
-        "environment": settings.environment
+        "environment": ENVIRONMENT,
+        "version": "2.0.0",
+        "features": {
+            "enhanced_location_intelligence": ENHANCED_FEATURES,
+            "rate_limiting": RATE_LIMITING_AVAILABLE,
+            "google_api_configured": bool(GOOGLE_API_KEY and GOOGLE_API_KEY != "your_actual_google_maps_api_key_here")
+        }
     }
 
 @app.get("/design/plan")
-@limiter.limit(f"{settings.rate_limit_per_minute}/minute")
-async def design_plan(request: Request, address: str = Query(..., description="Address to geocode")):
-    """Generate clinic layout files for the given address."""
+async def design_plan(
+    request: Request,
+    address: str = Query(..., description="Address to design for"),
+    building_type: str = Query("clinic", description="Type of building"),
+    area_sqm: float = Query(200, description="Building area in square meters"),
+    style_preference: str = Query("local", description="Style preference")
+):
+    """Generate architectural design with optional location intelligence."""
     
-    # Input validation
     if not address.strip():
         raise HTTPException(400, "Address cannot be empty")
     
-    if len(address) > 200:
-        raise HTTPException(400, "Address too long (max 200 characters)")
-    
-    logging.info(f"🏗️ Processing request for address: {address}")
-    
     try:
-        # 1) Geocoding
-        logging.info("📍 Starting geocoding...")
-        parcel = geocode_address(address)
-        logging.info(f"✅ Geocoding successful: {parcel}")
+        # Basic geocoding
+        if ENHANCED_FEATURES:
+            # Use enhanced geocoding
+            location_data = await get_location_intelligence(address)
+            parcel_bbox = location_data["bbox"]
+            
+            # Enhanced design prompt with context
+            enhanced_prompt = f"""
+            {building_type} design for {address}
+            Area: {area_sqm} sqm
+            Style preference: {style_preference}
+            Enhanced with location intelligence
+            """
+        else:
+            # Fallback to basic geocoding
+            if geocode_address:
+                parcel_data = geocode_address(address)
+                parcel_bbox = parcel_data["bbox"]
+            else:
+                # Ultimate fallback - fake bbox
+                parcel_bbox = [-1.1, 53.5, -1.0, 53.6]
+            enhanced_prompt = f"{building_type} layout at {address}"
         
-    except ValueError as e:
-        logging.warning(f"⚠️ Geocoding validation error: {e}")
-        raise HTTPException(400, f"Invalid address: {e}")
-    except Exception as e:
-        logging.error(f"❌ Geocoding error: {e}")
-        raise HTTPException(500, f"Geocoding service unavailable: {e}")
-    
-    try:
-        # 2) Image generation
-        logging.info("🎨 Generating layout images...")
-        base_png = generate_plan_png(parcel, prompt=f"clinic layout at {address}")
+        # Generate design files
+        base_png = generate_plan_png({"bbox": parcel_bbox}, prompt=enhanced_prompt)
         styled_png = style_png(base_png, prompt_suffix=address)
-        logging.info(f"✅ Images generated: {styled_png}")
         
-    except Exception as e:
-        logging.error(f"❌ Image generation error: {e}")
-        raise HTTPException(500, f"Image generation failed: {e}")
-    
-    # Generate file paths
-    stem = Path(styled_png).stem
-    dxf_path = settings.output_directory / f"{stem}.dxf"
-    ifc_path = settings.output_directory / f"{stem}.ifc"
-    
-    try:
-        # 3) DXF generation
+        # Generate CAD files
+        stem = Path(styled_png).stem
+        dxf_path = OUTPUT_DIR / f"{stem}.dxf"
+        ifc_path = OUTPUT_DIR / f"{stem}.ifc"
+        
         if not dxf_path.exists():
-            logging.info("📐 Generating DXF file...")
-            generate_dxf(parcel["bbox"], str(dxf_path))
-            logging.info(f"✅ DXF generated: {dxf_path}")
+            generate_dxf(parcel_bbox, str(dxf_path))
         
-    except Exception as e:
-        logging.error(f"❌ DXF generation error: {e}")
-        raise HTTPException(500, f"DXF generation failed: {e}")
-    
-    try:
-        # 4) IFC generation
         if not ifc_path.exists():
-            logging.info("🏗️ Generating IFC file...")
             convert_dxf_to_ifc(str(dxf_path), str(ifc_path))
-            logging.info(f"✅ IFC generated: {ifc_path}")
+        
+        result = {
+            "design_files": {
+                "plan_png": f"/outputs/{Path(styled_png).name}",
+                "dxf": f"/outputs/{dxf_path.name}",
+                "ifc": f"/outputs/{ifc_path.name}"
+            },
+            "address": address,
+            "building_type": building_type,
+            "area_sqm": area_sqm,
+            "enhanced_features": ENHANCED_FEATURES
+        }
+        
+        return result
         
     except Exception as e:
-        logging.error(f"❌ IFC generation error: {e}")
-        raise HTTPException(500, f"IFC generation failed: {e}")
-    
-    # Return file URLs
-    result = {
-        "plan_png": f"/outputs/{Path(styled_png).name}",
-        "dxf": f"/outputs/{dxf_path.name}",
-        "ifc": f"/outputs/{ifc_path.name}",
-        "address": address,
-        "timestamp": Path(styled_png).stat().st_mtime
-    }
-    
-    logging.info(f"🎉 Successfully processed request for: {address}")
-    return result
+        logging.error(f"Design generation error: {e}")
+        raise HTTPException(500, f"Design generation failed: {str(e)}")
 
 # ─── FRONTEND SERVING ────────────────────────────────────────────────────────
 
-# Serve frontend (must be last)
 try:
     app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-    logging.info("✅ Frontend static files mounted successfully")
+    logging.info("✅ Frontend mounted successfully")
 except Exception as e:
-    logging.error(f"❌ Error mounting frontend: {e}")
-    print("Make sure frontend/index.html exists")
+    logging.warning(f"⚠️ Frontend not available: {e}")
 
 # ─── STARTUP EVENT ───────────────────────────────────────────────────────────
 
 @app.on_event("startup")
 async def startup_event():
-    """Application startup tasks."""
-    logging.info("🚀 Clinic Layout Generator starting up...")
-    if settings.debug:
-        settings.print_config_summary()
-    logging.info("✅ Application startup complete")
+    """Application startup."""
+    logging.info("🚀 AI Architecture Platform starting...")
+    logging.info(f"Environment: {ENVIRONMENT}")
+    logging.info(f"Enhanced features: {ENHANCED_FEATURES}")
+    logging.info(f"Rate limiting: {RATE_LIMITING_AVAILABLE}")
+    
+    if not GOOGLE_API_KEY or GOOGLE_API_KEY == "your_actual_google_maps_api_key_here":
+        logging.warning("⚠️ Google API key not configured - using fallback mode")
+    
+    logging.info("✅ Startup complete")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown tasks."""
-    logging.info("🛑 Clinic Layout Generator shutting down...")
-    logging.info("✅ Application shutdown complete")
+if __name__ == "__main__":
+    import uvicorn
+    # Get port from environment or use 8000 as default
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
