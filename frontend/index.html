@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clinic Layout Generator</title>
+    <title>AI Architecture Platform - Transform Addresses into Professional Designs</title>
+    <meta name="description" content="AI-powered architecture platform that transforms any address into professional architectural files with location intelligence." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>" />
     <style>
         * {
             margin: 0;
@@ -12,36 +14,101 @@
         }
         
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
         
         h1 {
             color: #2c3e50;
-            margin-bottom: 0.5rem;
-            font-size: 2.5rem;
-            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .subtitle {
             color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+        }
+        
+        .feature {
             text-align: center;
-            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
             font-size: 1.1rem;
+        }
+        
+        .feature-desc {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
         
         .input-group {
@@ -53,7 +120,7 @@
         
         input { 
             flex: 1;
-            padding: 1rem 1.5rem;
+            padding: 1.2rem 1.5rem;
             font-size: 1.1rem;
             border: 2px solid #e1e8ed;
             border-radius: 12px;
@@ -65,11 +132,12 @@
             outline: none;
             border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
         }
         
         button { 
-            padding: 1rem 2rem;
+            padding: 1.2rem 2.5rem;
             font-size: 1.1rem;
             font-weight: 600;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -78,12 +146,18 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 160px;
+            min-width: 180px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
         }
         
         button:disabled {
@@ -95,10 +169,11 @@
         
         .message {
             margin-top: 1.5rem;
-            padding: 1.2rem;
+            padding: 1.5rem;
             border-radius: 12px;
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.4s ease;
+            font-weight: 500;
         }
         
         @keyframes fadeIn {
@@ -125,21 +200,16 @@
             border-left: 4px solid #2d3436;
         }
         
-        #rate-limit-warning {
-            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-            color: white;
-            border-left: 4px solid #d63031;
-        }
-        
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+            margin-right: 12px;
+            vertical-align: middle;
         }
         
         @keyframes spin {
@@ -149,190 +219,259 @@
         .results {
             margin-top: 2.5rem;
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .results h3 {
             color: #2c3e50;
             margin-bottom: 1.5rem;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             text-align: center;
         }
         
         .file-links {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
         
         .file-link {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.2rem;
+            padding: 1.5rem;
             background: linear-gradient(135deg, #2ed573 0%, #17a2b8 100%);
             color: white;
             text-decoration: none;
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s ease;
-            gap: 0.5rem;
+            gap: 1rem;
             position: relative;
+            overflow: hidden;
+        }
+        
+        .file-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .file-link:hover::before {
+            left: 100%;
         }
         
         .file-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(46, 213, 115, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(46, 213, 115, 0.4);
         }
         
         .file-link.png {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
         }
         
+        .file-link.png:hover {
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+        }
+        
         .file-link.dxf {
             background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+        }
+        
+        .file-link.dxf:hover {
+            box-shadow: 0 15px 35px rgba(253, 203, 110, 0.4);
         }
         
         .file-link.ifc {
             background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
         }
         
-        .file-icon {
-            font-size: 1.3rem;
+        .file-link.ifc:hover {
+            box-shadow: 0 15px 35px rgba(108, 92, 231, 0.4);
         }
         
-        .rate-limit-info {
+        .file-icon {
+            font-size: 1.8rem;
+        }
+        
+        .api-info {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: #6c757d;
-            text-align: center;
-        }
-        
-        .feature-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: #f8f9fa;
             border-radius: 12px;
-        }
-        
-        .feature {
+            padding: 1.5rem;
+            margin-top: 2rem;
             text-align: center;
-            padding: 1rem;
         }
         
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+        .api-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
         }
         
-        .feature-title {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.3rem;
-        }
-        
-        .feature-desc {
-            color: #7f8c8d;
+        .api-link {
+            padding: 0.8rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
             font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .api-link:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-online {
+            background: #2ed573;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         @media (max-width: 768px) {
             .container {
-                margin: 1rem;
+                margin: 0.5rem;
                 padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
             }
             
             .input-group {
                 flex-direction: column;
             }
             
-            h1 {
-                font-size: 2rem;
+            .features-grid {
+                grid-template-columns: 1fr;
             }
             
             .file-links {
                 grid-template-columns: 1fr;
             }
+            
+            .api-links {
+                flex-direction: column;
+                align-items: center;
+            }
         }
         
-        .download-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: rgba(255,255,255,0.2);
-            border-radius: 12px;
-            width: 0%;
-            transition: width 0.3s ease;
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
         
-        .file-link.downloading .download-progress {
-            width: 100%;
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏥 Clinic Layout Generator</h1>
-        <p class="subtitle">Transform any address into professional architectural files</p>
-        
-        <div class="rate-limit-info">
-            ⏱️ Rate limit: <span id="rate-limit-display">10 requests per minute</span> | 
-            🔑 Uses Google Maps API for geocoding
+        <div class="header">
+            <h1>🏗️ AI Architecture Platform</h1>
+            <p class="subtitle">Transform any address worldwide into professional architectural designs with advanced location intelligence and climate analysis</p>
         </div>
         
-        <div class="feature-list">
+        <div class="features-grid">
             <div class="feature">
-                <div class="feature-icon">🗺️</div>
-                <div class="feature-title">Smart Geocoding</div>
-                <div class="feature-desc">Converts addresses to precise coordinates</div>
+                <span class="feature-icon">🌍</span>
+                <div class="feature-title">Location Intelligence</div>
+                <div class="feature-desc">Comprehensive climate analysis and solar optimization for any global location</div>
             </div>
             <div class="feature">
-                <div class="feature-icon">🖼️</div>
-                <div class="feature-title">Visual Layouts</div>
-                <div class="feature-desc">Generates styled PNG floor plans</div>
+                <span class="feature-icon">🏛️</span>
+                <div class="feature-title">Architectural Styles</div>
+                <div class="feature-desc">Regional architectural recommendations based on local culture and materials</div>
             </div>
             <div class="feature">
-                <div class="feature-icon">📐</div>
-                <div class="feature-title">CAD Files</div>
-                <div class="feature-desc">Creates industry-standard DXF files</div>
+                <span class="feature-icon">🤖</span>
+                <div class="feature-title">AI Generation</div>
+                <div class="feature-desc">Advanced AI creates context-aware floor plans and 3D visualizations</div>
             </div>
             <div class="feature">
-                <div class="feature-icon">🏗️</div>
-                <div class="feature-title">BIM Ready</div>
-                <div class="feature-desc">Exports to IFC format for BIM software</div>
+                <span class="feature-icon">📐</span>
+                <div class="feature-title">Professional Output</div>
+                <div class="feature-desc">Industry-standard CAD (DXF) and BIM (IFC) files ready for development</div>
             </div>
         </div>
         
-        <div class="input-group">
-            <input id="address" placeholder="Enter address (e.g., DN4 7BH, London, UK, 123 Main St)" />
-            <button id="go">Generate Layout</button>
+        <div class="demo-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #2c3e50;">Generate Your Architectural Design</h2>
+            
+            <div class="input-group">
+                <input id="address" placeholder="Enter any address worldwide (e.g., DN4 7BH, 123 Main St, London, Tokyo)" />
+                <button id="go">Generate Design</button>
+            </div>
+            
+            <div id="loading" class="message">
+                <div class="spinner"></div>
+                <span>Analyzing location and generating professional architectural files... This may take 15-30 seconds.</span>
+            </div>
+            
+            <div id="error" class="message"></div>
+            <div id="success" class="message"></div>
+            
+            <div id="results" class="results">
+                <h3>📁 Your Professional Architectural Files</h3>
+                <div id="file-links" class="file-links"></div>
+            </div>
         </div>
         
-        <div id="loading" class="message">
-            <div class="spinner"></div>
-            <span>Generating your clinic layout files... This may take 10-30 seconds.</span>
+        <div class="api-info">
+            <h3 style="color: #2c3e50; margin-bottom: 1rem;">
+                <span class="status-indicator status-online"></span>
+                Platform Status & API Access
+            </h3>
+            <p style="color: #7f8c8d; margin-bottom: 1rem;">
+                Advanced AI architecture platform with location intelligence and professional file generation
+            </p>
+            <div class="api-links">
+                <a href="/api/status" class="api-link" target="_blank">📊 System Status</a>
+                <a href="/api/health" class="api-link" target="_blank">🔍 Health Check</a>
+                <a href="/docs" class="api-link" target="_blank">📚 API Documentation</a>
+            </div>
         </div>
         
-        <div id="rate-limit-warning" class="message">
-            <strong>⚠️ Rate Limit Exceeded</strong><br>
-            You've made too many requests. Please wait a minute before trying again.
-            <br><small>We limit requests to prevent API abuse and keep the service free.</small>
-        </div>
-        
-        <div id="error" class="message"></div>
-        <div id="success" class="message"></div>
-        
-        <div id="results" class="results">
-            <h3>📁 Your Generated Files</h3>
-            <div id="file-links" class="file-links"></div>
+        <div class="footer">
+            <p>
+                Powered by advanced AI and location intelligence • 
+                <a href="https://github.com" target="_blank">Open Source</a> • 
+                Professional architectural design automation
+            </p>
         </div>
     </div>
 
@@ -344,49 +483,31 @@
         const loadingDiv = document.getElementById("loading");
         const resultsDiv = document.getElementById("results");
         const fileLinksDiv = document.getElementById("file-links");
-        const rateLimitWarning = document.getElementById("rate-limit-warning");
-        const rateLimitDisplay = document.getElementById("rate-limit-display");
 
-        // Track request count for client-side rate limiting
-        let requestCount = 0;
-        let lastRequestTime = 0;
-        const RATE_LIMIT = 10; // requests per minute
-        const RATE_WINDOW = 60 * 1000; // 60 seconds in milliseconds
+        // Enhanced address examples with rotation
+        const addressExamples = [
+            "DN4 7BH, UK",
+            "123 Main Street, New York",
+            "1600 Pennsylvania Avenue, Washington DC",
+            "Big Ben, London, UK",
+            "Times Square, New York",
+            "Eiffel Tower, Paris, France",
+            "Sydney Opera House, Australia",
+            "Burj Khalifa, Dubai",
+            "Machu Picchu, Peru",
+            "Red Square, Moscow"
+        ];
 
-        // Load configuration on startup
-        async function loadConfig() {
-            try {
-                const response = await fetch('/api/config');
-                if (response.ok) {
-                    const config = await response.json();
-                    rateLimitDisplay.textContent = `${config.rate_limit_per_minute} requests per minute`;
-                }
-            } catch (error) {
-                console.warn('Could not load configuration:', error);
-            }
+        let exampleIndex = 0;
+        
+        // Rotate placeholder examples
+        function updatePlaceholder() {
+            addressInput.placeholder = `Enter address (e.g., ${addressExamples[exampleIndex]})`;
+            exampleIndex = (exampleIndex + 1) % addressExamples.length;
         }
-
-        // Check if user is within rate limit
-        function checkRateLimit() {
-            const now = Date.now();
-            
-            // Reset count if window has passed
-            if (now - lastRequestTime > RATE_WINDOW) {
-                requestCount = 0;
-            }
-            
-            if (requestCount >= RATE_LIMIT) {
-                return false;
-            }
-            
-            return true;
-        }
-
-        // Track request
-        function trackRequest() {
-            requestCount++;
-            lastRequestTime = Date.now();
-        }
+        
+        // Update placeholder every 3 seconds
+        setInterval(updatePlaceholder, 3000);
 
         async function generateLayout() {
             const address = addressInput.value.trim();
@@ -394,9 +515,14 @@
             // Reset UI state
             hideAllMessages();
             
-            // Validation
+            // Enhanced validation
             if (!address) {
-                showError("Please enter a valid address");
+                showError("Please enter a valid address or location");
+                return;
+            }
+            
+            if (address.length < 3) {
+                showError("Address too short - please enter a more specific location");
                 return;
             }
             
@@ -405,24 +531,17 @@
                 return;
             }
             
-            // Client-side rate limit check
-            if (!checkRateLimit()) {
-                showRateLimitWarning();
-                return;
-            }
-            
             // Show loading state
             showLoading();
-            trackRequest();
             
             try {
-                console.log("🚀 Making request for address:", address);
+                console.log("🚀 Generating design for address:", address);
                 
-                const response = await fetch(`/design/plan?address=${encodeURIComponent(address)}`);
+                const response = await fetch(`/design/plan?address=${encodeURIComponent(address)}&building_type=clinic&area_sqm=200&style_preference=local`);
                 console.log("📡 Response status:", response.status);
                 
                 if (response.status === 429) {
-                    showRateLimitWarning();
+                    showError("Rate limit exceeded. Please wait a moment before generating another design.");
                     return;
                 }
                 
@@ -434,19 +553,16 @@
                 const data = await response.json();
                 console.log("✅ Response data:", data);
                 
-                // Show success and results
-                showSuccess(address);
-                showResults(data);
+                if (data.success) {
+                    showSuccess(address, data);
+                    showResults(data);
+                } else {
+                    throw new Error("Design generation failed");
+                }
                 
             } catch (error) {
                 console.error("❌ Error:", error);
-                
-                // Check if it's a network error that might be rate limiting
-                if (error.message.includes('429') || error.message.includes('rate limit')) {
-                    showRateLimitWarning();
-                } else {
-                    showError(error.message);
-                }
+                showError(error.message || "An unexpected error occurred. Please try again.");
             } finally {
                 hideLoading();
             }
@@ -456,7 +572,6 @@
             errorDiv.style.display = "none";
             successDiv.style.display = "none";
             resultsDiv.style.display = "none";
-            rateLimitWarning.style.display = "none";
         }
 
         function showLoading() {
@@ -468,50 +583,54 @@
         function hideLoading() {
             loadingDiv.style.display = "none";
             generateButton.disabled = false;
-            generateButton.textContent = "Generate Layout";
+            generateButton.textContent = "Generate Design";
         }
 
         function showError(message) {
             errorDiv.innerHTML = `
-                <strong>❌ Error:</strong> ${message}
-                <br><small>Please check your address and try again. If the problem persists, contact support.</small>
+                <strong>❌ Generation Failed</strong><br>
+                ${message}
+                <br><small>Please verify the address and try again. If the problem persists, the address might not be recognized by our geocoding service.</small>
             `;
             errorDiv.style.display = "block";
         }
 
-        function showRateLimitWarning() {
-            rateLimitWarning.style.display = "block";
-            setTimeout(() => {
-                if (rateLimitWarning.style.display === "block") {
-                    rateLimitWarning.style.display = "none";
-                }
-            }, 10000); // Hide after 10 seconds
-        }
-
-        function showSuccess(address) {
+        function showSuccess(address, data) {
+            const enhancedFeatures = data.system_info?.enhanced_features ? "with advanced location intelligence" : "using basic geocoding";
+            
             successDiv.innerHTML = `
-                <strong>🎉 Success!</strong> Layout files generated for: <em>${address}</em>
-                <br><small>All files are ready for download below. Files are stored securely and will be available for 24 hours.</small>
+                <strong>🎉 Design Generated Successfully!</strong><br>
+                Professional architectural files created for: <em>${address}</em><br>
+                <small>Generated ${enhancedFeatures} • All files ready for download • Industry-standard formats</small>
             `;
             successDiv.style.display = "block";
         }
 
         function showResults(data) {
+            const files = data.design_files;
+            const projectInfo = data.project_info || {};
+            
             fileLinksDiv.innerHTML = `
-                <a href="${data.plan_png}" class="file-link png" target="_blank" onclick="trackDownload('png')">
+                <a href="${files.plan_png}" class="file-link png" target="_blank" onclick="trackDownload('png')">
                     <span class="file-icon">🖼️</span>
-                    <span>View Layout (PNG)</span>
-                    <div class="download-progress"></div>
+                    <div>
+                        <div>Floor Plan (PNG)</div>
+                        <small>High-resolution architectural layout</small>
+                    </div>
                 </a>
-                <a href="${data.dxf}" class="file-link dxf" target="_blank" download onclick="trackDownload('dxf')">
+                <a href="${files.dxf}" class="file-link dxf" target="_blank" download onclick="trackDownload('dxf')">
                     <span class="file-icon">📐</span>
-                    <span>Download DXF</span>
-                    <div class="download-progress"></div>
+                    <div>
+                        <div>CAD File (DXF)</div>
+                        <small>AutoCAD compatible drawing</small>
+                    </div>
                 </a>
-                <a href="${data.ifc}" class="file-link ifc" target="_blank" download onclick="trackDownload('ifc')">
+                <a href="${files.ifc}" class="file-link ifc" target="_blank" download onclick="trackDownload('ifc')">
                     <span class="file-icon">🏗️</span>
-                    <span>Download IFC</span>
-                    <div class="download-progress"></div>
+                    <div>
+                        <div>BIM Model (IFC)</div>
+                        <small>Industry standard building model</small>
+                    </div>
                 </a>
             `;
             resultsDiv.style.display = "block";
@@ -520,11 +639,14 @@
         function trackDownload(fileType) {
             console.log(`📥 User downloaded ${fileType.toUpperCase()} file`);
             
-            // Add download animation
-            event.currentTarget.classList.add('downloading');
+            // Add visual feedback
+            const link = event.currentTarget;
+            const originalText = link.innerHTML;
+            link.style.transform = 'scale(0.95)';
+            
             setTimeout(() => {
-                event.currentTarget.classList.remove('downloading');
-            }, 1000);
+                link.style.transform = 'scale(1)';
+            }, 150);
         }
 
         // Event listeners
@@ -536,26 +658,25 @@
             }
         });
 
-        // Focus input on page load and load config
+        // Auto-focus input on page load
         window.addEventListener("load", () => {
             addressInput.focus();
-            loadConfig();
+            updatePlaceholder();
         });
 
-        // Add helpful placeholder cycling
-        const placeholders = [
-            "DN4 7BH",
-            "123 Main Street, London",
-            "1600 Pennsylvania Avenue, Washington DC",
-            "Times Square, New York",
-            "Big Ben, London, UK"
-        ];
+        // Check API status on load
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    console.log("✅ API is online and ready");
+                }
+            } catch (error) {
+                console.warn("⚠️ Could not verify API status");
+            }
+        }
 
-        let placeholderIndex = 0;
-        setInterval(() => {
-            placeholderIndex = (placeholderIndex + 1) % placeholders.length;
-            addressInput.placeholder = `Enter address (e.g., ${placeholders[placeholderIndex]})`;
-        }, 3000);
+        checkApiStatus();
     </script>
 </body>
 </html>
